@@ -69,12 +69,8 @@ npm install
 # MongoDB Connection
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/portfolio
 
-# Admin Password
+# Admin Panel Security
 ADMIN_PASSWORD=your-secure-password
-
-# Next.js
-NEXTAUTH_SECRET=your-nextauth-secret
-NEXTAUTH_URL=http://localhost:3000
 ```
 
 4. **Seed the database** (Optional)
@@ -158,8 +154,6 @@ git push origin main
 ```env
 MONGODB_URI=your-production-mongodb-uri
 ADMIN_PASSWORD=your-secure-admin-password
-NEXTAUTH_SECRET=your-production-secret
-NEXTAUTH_URL=https://your-domain.vercel.app
 ```
 
 ### Alternative Deployments

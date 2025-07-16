@@ -13,3 +13,17 @@ export async function GET() {
     );
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const newPost = await dbOperations.createBlogPost(body);
+    return NextResponse.json(newPost, { status: 201 });
+  } catch (error) {
+    console.error("Error creating blog post:", error);
+    return NextResponse.json(
+      { error: "Failed to create blog post" },
+      { status: 500 }
+    );
+  }
+}

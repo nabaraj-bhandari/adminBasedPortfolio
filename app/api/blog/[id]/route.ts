@@ -22,3 +22,36 @@ export async function GET(
     );
   }
 }
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await request.json();
+    const updatedPost = await dbOperations.updateBlogPost(params.id, body);
+    return NextResponse.json(updatedPost);
+  } catch (error) {
+    console.error("Error updating blog post:", error);
+    return NextResponse.json(
+      { error: "Failed to update blog post" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await dbOperations.deleteBlogPost(params.id);
+    return NextResponse.json({ message: "Blog post deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting blog post:", error);
+    return NextResponse.json(
+      { error: "Failed to delete blog post" },
+      { status: 500 }
+    );
+  }
+}

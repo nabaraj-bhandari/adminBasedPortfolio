@@ -196,10 +196,10 @@ export default function Home() {
               Featured Projects
             </motion.h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {isLoadingProjects ? (
-                // Loading skeletons
-                [...Array(3)].map((_, i) => (
+            {isLoadingProjects ? (
+              // Loading skeletons
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[...Array(3)].map((_, i) => (
                   <motion.div key={i} variants={fadeInUp}>
                     <Card className="bg-card/50 backdrop-blur-sm">
                       <CardContent className="p-6">
@@ -213,108 +213,128 @@ export default function Home() {
                       </CardContent>
                     </Card>
                   </motion.div>
-                ))
-              ) : featuredProjects.length > 0 ? (
-                featuredProjects.map((project: any, index) => (
-                  <motion.div key={project._id || index} variants={fadeInUp}>
-                    <Card className="group hover:shadow-xl transition-all duration-300 border hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-                      <CardContent className="p-6">
-                        <div className="h-48 rounded-lg mb-4 overflow-hidden bg-gradient-to-br from-primary/10 to-purple-600/10 border border-border/50">
-                          {project.image ? (
-                            <img
-                              src={project.image}
-                              alt={project.title}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <span className="text-muted-foreground">
-                                Project Image
+                ))}
+              </div>
+            ) : featuredProjects.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {featuredProjects.map((project: any, index) => (
+                    <motion.div key={project._id || index} variants={fadeInUp}>
+                      <Card className="group hover:shadow-xl transition-all duration-300 border hover:border-primary/20 bg-card/50 backdrop-blur-sm h-full">
+                        <CardContent className="p-6 flex flex-col h-full">
+                          <div className="h-48 rounded-lg mb-4 overflow-hidden bg-gradient-to-br from-primary/10 to-purple-600/10 border border-border/50">
+                            {project.image ? (
+                              <img
+                                src={project.image}
+                                alt={project.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-muted-foreground">
+                                  Project Image
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <h3 className="text-xl font-semibold mb-2">
+                            {project.title}
+                          </h3>
+                          <p className="text-muted-foreground mb-4 leading-relaxed line-clamp-3 flex-grow">
+                            {project.description}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {project.tags
+                              .slice(0, 3)
+                              .map((tag: string, tagIndex: number) => (
+                                <span
+                                  key={tagIndex}
+                                  className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            {project.tags.length > 3 && (
+                              <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
+                                +{project.tags.length - 3} more
                               </span>
-                            </div>
-                          )}
-                        </div>
-                        <h3 className="text-xl font-semibold mb-2">
-                          {project.title}
-                        </h3>
-                        <p className="text-muted-foreground mb-4 leading-relaxed line-clamp-3">
-                          {project.description}
-                        </p>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {project.tags
-                            .slice(0, 3)
-                            .map((tag: string, tagIndex: number) => (
-                              <span
-                                key={tagIndex}
-                                className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          {project.tags.length > 3 && (
-                            <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
-                              +{project.tags.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex space-x-2">
-                          {project.github && (
-                            <Button size="sm" variant="outline" asChild>
-                              <a
-                                href={project.github}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Github className="w-4 h-4 mr-2" />
-                                Code
-                              </a>
-                            </Button>
-                          )}
-                          {project.demo && (
-                            <Button size="sm" asChild>
-                              <a
-                                href={project.demo}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <ExternalLink className="w-4 h-4 mr-2" />
-                                Demo
-                              </a>
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))
-              ) : (
-                // No featured projects message
-                <motion.div
-                  variants={fadeInUp}
-                  className="col-span-full text-center py-12"
-                >
-                  <p className="text-muted-foreground text-lg">
-                    No featured projects yet.{" "}
-                    <Link
-                      href="/projects"
-                      className="text-primary hover:underline"
-                    >
-                      View all projects
-                    </Link>
-                  </p>
-                </motion.div>
-              )}
-            </div>
+                            )}
+                          </div>
+                          <div className="flex space-x-2 mt-auto">
+                            {project.github && (
+                              <Button size="sm" variant="outline" asChild>
+                                <a
+                                  href={project.github}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <Github className="w-4 h-4 mr-2" />
+                                  Code
+                                </a>
+                              </Button>
+                            )}
+                            {project.demo && (
+                              <Button size="sm" asChild>
+                                <a
+                                  href={project.demo}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <ExternalLink className="w-4 h-4 mr-2" />
+                                  Demo
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
 
-            {/* View All Projects Button */}
-            {!isLoadingProjects && featuredProjects.length > 0 && (
-              <motion.div variants={fadeInUp} className="mt-8 text-center">
-                <Button variant="outline" asChild>
-                  <Link href="/projects">
-                    View All Projects
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
+                {/* View All Projects Button */}
+                <motion.div variants={fadeInUp} className="mt-12 text-center">
+                  <Button variant="outline" asChild>
+                    <Link href="/projects">
+                      View All Projects
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                </motion.div>
+              </>
+            ) : (
+              // No featured projects message
+              <motion.div variants={fadeInUp} className="text-center py-16">
+                <div className="max-w-md mx-auto">
+                  <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-purple-600/20 flex items-center justify-center">
+                    <svg
+                      className="w-12 h-12 text-muted-foreground"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">
+                    No Featured Projects Yet
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    Featured projects will appear here once they're marked as
+                    featured. In the meantime, check out all available projects.
+                  </p>
+                  <Button variant="outline" asChild>
+                    <Link href="/projects">
+                      Browse All Projects
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                </div>
               </motion.div>
             )}
           </motion.div>

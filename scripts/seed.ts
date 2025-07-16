@@ -53,6 +53,7 @@ async function seedDatabase() {
         github: "https://github.com/yourusername/ecommerce",
         demo: "https://yourecommerce.vercel.app",
         date: new Date("2024-01-15"),
+        featured: true,
       },
       {
         title: "Task Management App",
@@ -64,6 +65,7 @@ async function seedDatabase() {
         github: "https://github.com/yourusername/taskapp",
         demo: "https://yourtaskapp.vercel.app",
         date: new Date("2024-02-20"),
+        featured: true,
       },
     ]);
     console.log("✅ Projects seeded");

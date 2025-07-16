@@ -6,9 +6,7 @@
   "devCommand": "npm run dev",
   "env": {
     "MONGODB_URI": "@mongodb_uri",
-    "ADMIN_PASSWORD": "@admin_password",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "NEXTAUTH_URL": "@nextauth_url"
+    "ADMIN_PASSWORD": "@admin_password"
   },
   "functions": {
     "app/api/**/*.ts": {

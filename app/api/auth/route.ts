@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sign } from "jsonwebtoken";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,16 +9,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
-    // Create JWT token
-    const token = sign(
-      { admin: true, timestamp: Date.now() },
-      process.env.JWT_SECRET || "fallback-secret",
-      { expiresIn: "24h" }
-    );
-
-    // Create response with JWT cookie
+    // Create a simple session response
     const response = NextResponse.json({ success: true });
-    response.cookies.set("admin-token", token, {
+
+    // Set a simple authentication cookie
+    response.cookies.set("admin-auth", "authenticated", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -40,6 +34,6 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   // Logout endpoint - clear the cookie
   const response = NextResponse.json({ success: true });
-  response.cookies.delete("admin-token");
+  response.cookies.delete("admin-auth");
   return response;
 }

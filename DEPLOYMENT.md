@@ -67,8 +67,6 @@ git push origin main
 ```env
 MONGODB_URI=mongodb+srv://...
 ADMIN_PASSWORD=your-secure-password
-NEXTAUTH_SECRET=your-production-secret
-NEXTAUTH_URL=https://your-domain.vercel.app
 ```
 
 ## 🎯 Repository is now optimized for:
