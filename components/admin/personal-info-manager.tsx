@@ -55,37 +55,36 @@ export default function PersonalInfoManager() {
         } else {
           // Set default placeholder values if no data exists
           setPersonalInfo({
-            full_name: "Your Full Name",
-            title: "Your Professional Title",
-            description:
-              "Brief description about yourself and your expertise...",
-            email: "your.email@example.com",
-            phone: "+1 (555) 123-4567",
-            location: "Your City, Country",
+            full_name: "",
+            title: "",
+            description: "",
+            email: "",
+            phone: "",
+            location: "",
             resume_url: "",
             profile_picture: "",
-            github: "https://github.com/yourusername",
-            linkedin: "https://linkedin.com/in/yourusername",
-            twitter: "https://twitter.com/yourusername",
-            website: "https://yourwebsite.com",
+            github: "",
+            linkedin: "",
+            twitter: "",
+            website: "",
           });
         }
       } catch (error) {
         console.error("Error fetching personal info:", error);
-        // Set default placeholder values on error
+        // Set empty values on error to show placeholders
         setPersonalInfo({
-          full_name: "Your Full Name",
-          title: "Your Professional Title",
-          description: "Brief description about yourself and your expertise...",
-          email: "your.email@example.com",
-          phone: "+1 (555) 123-4567",
-          location: "Your City, Country",
+          full_name: "",
+          title: "",
+          description: "",
+          email: "",
+          phone: "",
+          location: "",
           resume_url: "",
           profile_picture: "",
-          github: "https://github.com/yourusername",
-          linkedin: "https://linkedin.com/in/yourusername",
-          twitter: "https://twitter.com/yourusername",
-          website: "https://yourwebsite.com",
+          github: "",
+          linkedin: "",
+          twitter: "",
+          website: "",
         });
       } finally {
         setIsInitialLoading(false);
@@ -157,22 +156,122 @@ export default function PersonalInfoManager() {
 
       {isInitialLoading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Loading skeleton */}
-          {[1, 2].map((i) => (
-            <Card key={i}>
+          {/* Basic Information Skeleton */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card className="bg-card/50 backdrop-blur-sm">
               <CardHeader>
-                <div className="h-6 bg-muted animate-pulse rounded w-1/3"></div>
+                <div className="flex items-center">
+                  <div className="w-5 h-5 bg-muted animate-pulse rounded mr-2"></div>
+                  <div className="h-6 bg-muted animate-pulse rounded w-40"></div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {[1, 2, 3, 4].map((j) => (
-                  <div key={j} className="space-y-2">
-                    <div className="h-4 bg-muted animate-pulse rounded w-1/4"></div>
-                    <div className="h-10 bg-muted animate-pulse rounded"></div>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-4 bg-muted animate-pulse rounded w-24"></div>
+                    <div
+                      className={`h-10 bg-muted animate-pulse rounded ${
+                        i === 3 ? "h-20" : ""
+                      }`}
+                    ></div>
                   </div>
                 ))}
               </CardContent>
             </Card>
-          ))}
+          </motion.div>
+
+          {/* Contact Information Skeleton */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            <Card className="bg-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <div className="flex items-center">
+                  <div className="w-5 h-5 bg-muted animate-pulse rounded mr-2"></div>
+                  <div className="h-6 bg-muted animate-pulse rounded w-44"></div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-4 bg-muted animate-pulse rounded w-28"></div>
+                    <div className="h-10 bg-muted animate-pulse rounded"></div>
+                    {i === 5 && (
+                      <div className="h-3 bg-muted/50 animate-pulse rounded w-3/4"></div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Social Media Links Skeleton */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="lg:col-span-2"
+          >
+            <Card className="bg-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <div className="flex items-center">
+                  <div className="w-5 h-5 bg-muted animate-pulse rounded mr-2"></div>
+                  <div className="h-6 bg-muted animate-pulse rounded w-48"></div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 bg-muted animate-pulse rounded mr-2"></div>
+                        <div className="h-4 bg-muted animate-pulse rounded w-32"></div>
+                      </div>
+                      <div className="h-10 bg-muted animate-pulse rounded"></div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Preview Skeleton */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+            className="lg:col-span-2"
+          >
+            <Card className="bg-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <div className="h-6 bg-muted animate-pulse rounded w-20"></div>
+                <div className="h-4 bg-muted/50 animate-pulse rounded w-80"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center space-y-4 p-6 bg-muted/30 rounded-lg">
+                  <div className="h-9 bg-gradient-to-r from-muted via-muted to-muted animate-pulse rounded w-80 mx-auto"></div>
+                  <div className="space-y-2">
+                    <div className="h-5 bg-muted animate-pulse rounded w-96 mx-auto"></div>
+                    <div className="h-5 bg-muted animate-pulse rounded w-72 mx-auto"></div>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-4">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="flex items-center">
+                        <div className="w-4 h-4 bg-muted animate-pulse rounded mr-1"></div>
+                        <div className="h-4 bg-muted animate-pulse rounded w-32"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -198,7 +297,7 @@ export default function PersonalInfoManager() {
                     onChange={(e) =>
                       handleInputChange("full_name", e.target.value)
                     }
-                    placeholder="Your full name"
+                    placeholder="Enter your full name"
                   />
                 </div>
 
@@ -208,7 +307,7 @@ export default function PersonalInfoManager() {
                     id="title"
                     value={personalInfo.title}
                     onChange={(e) => handleInputChange("title", e.target.value)}
-                    placeholder="e.g., AI/ML Developer"
+                    placeholder="e.g., Computer Engineer & Full Stack Developer"
                   />
                 </div>
 
@@ -220,7 +319,7 @@ export default function PersonalInfoManager() {
                     onChange={(e) =>
                       handleInputChange("description", e.target.value)
                     }
-                    placeholder="Brief description about yourself"
+                    placeholder="Tell visitors about yourself, your expertise, and what you're passionate about..."
                     rows={4}
                   />
                 </div>
@@ -404,11 +503,11 @@ export default function PersonalInfoManager() {
             <CardContent>
               <div className="text-center space-y-4 p-6 bg-muted/30 rounded-lg">
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  {personalInfo.title || "Your Professional Title"}
+                  {personalInfo.title || "Enter your professional title"}
                 </h1>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
                   {personalInfo.description ||
-                    "Brief description about yourself and your expertise..."}
+                    "Add a description about yourself and your expertise to see it here..."}
                 </p>
                 <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center">
@@ -417,7 +516,7 @@ export default function PersonalInfoManager() {
                   </span>
                   <span className="flex items-center">
                     <MapPin className="w-4 h-4 mr-1" />
-                    {personalInfo.location || "Your City, Country"}
+                    {personalInfo.location || "Add your location"}
                   </span>
                 </div>
               </div>

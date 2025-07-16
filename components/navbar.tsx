@@ -31,7 +31,7 @@ export default function Navbar() {
   if (!mounted) return null;
 
   return (
-    <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-lg border-b border-border z-50">
+    <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-lg border-b border-border z-50 unselectable">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center">

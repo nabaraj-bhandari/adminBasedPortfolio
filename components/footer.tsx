@@ -31,7 +31,7 @@ export default function Footer() {
   const displayName = personalInfo?.full_name || "Your Name";
 
   return (
-    <footer className="bg-muted/50 border-t">
+    <footer className="bg-background border-t border-border/50 unselectable">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <p className="text-muted-foreground">Made with ❤️ by {displayName}</p>

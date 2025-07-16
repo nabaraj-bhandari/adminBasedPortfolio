@@ -57,7 +57,9 @@ export const apiService = {
 
   async getBlogPost(id: string): Promise<BlogPost | null> {
     try {
-      const response = await fetch(`/api/blog/${id}`);
+      const response = await fetch(`/api/blog/${id}`, {
+        next: { revalidate: 300 }, // Cache for 5 minutes
+      });
       if (!response.ok) throw new Error("Failed to fetch");
       return await response.json();
     } catch (error) {

@@ -61,8 +61,8 @@ export default function DynamicLogo({ className = "" }: DynamicLogoProps) {
   // Create gradient classes based on theme
   const gradientClass =
     theme === "dark"
-      ? "bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
-      : "bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent";
+      ? "bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 bg-clip-text text-transparent"
+      : "bg-gradient-to-r from-blue-800 via-blue-600 to-blue-800 bg-clip-text text-transparent";
 
   return (
     <motion.div

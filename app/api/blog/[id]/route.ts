@@ -13,7 +13,12 @@ export async function GET(
         { status: 404 }
       );
     }
-    return NextResponse.json(post);
+
+    return NextResponse.json(post, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
   } catch (error) {
     console.error("Error fetching blog post:", error);
     return NextResponse.json(
