@@ -63,6 +63,19 @@ export interface BlogPost {
   updatedAt?: Date;
 }
 
+export interface ContactMessage {
+  _id?: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  read: boolean;
+  replied: boolean;
+  priority: "low" | "medium" | "high";
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 // Database operations return types
 export interface DatabaseOperations {
   // Personal Info

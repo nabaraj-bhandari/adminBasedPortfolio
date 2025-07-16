@@ -10,6 +10,8 @@ import {
   Plus,
   Edit,
   User,
+  Mail,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,9 +19,18 @@ import ProjectManager from "./project-manager";
 import SkillManager from "./skill-manager";
 import BlogManager from "./blog-manager";
 import PersonalInfoManager from "./personal-info-manager";
+import ContactMessageManager from "./contact-message-manager";
+import EmailTestPanel from "./email-test-panel";
 import LogoutButton from "./logout-button";
 
-type TabType = "dashboard" | "projects" | "skills" | "blog" | "personal";
+type TabType =
+  | "dashboard"
+  | "projects"
+  | "skills"
+  | "blog"
+  | "personal"
+  | "contact"
+  | "settings";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
@@ -65,6 +76,8 @@ export default function AdminDashboard() {
     { id: "projects", name: "Projects", icon: FolderOpen },
     { id: "skills", name: "Skills", icon: Code },
     { id: "blog", name: "Blog", icon: BookOpen },
+    { id: "contact", name: "Contact Messages", icon: Mail },
+    { id: "settings", name: "Settings", icon: Settings },
   ];
 
   // Create display stats from real data
@@ -101,6 +114,10 @@ export default function AdminDashboard() {
         return <SkillManager />;
       case "blog":
         return <BlogManager />;
+      case "contact":
+        return <ContactMessageManager />;
+      case "settings":
+        return <EmailTestPanel />;
       default:
         return (
           <div className="space-y-6">

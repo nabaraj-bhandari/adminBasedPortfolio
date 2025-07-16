@@ -1,9 +1,26 @@
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  images: { unoptimized: true },
+  // Enable image optimization
+  images: { 
+    domains: ['images.pexels.com', 'example.com', 'res.cloudinary.com'],
+    formats: ['image/webp', 'image/avif'],
+  },
+  // Enable compression
+  compress: true,
+  // Optimize CSS
+  swcMinify: true,
+  // Enable experimental features for performance
+  experimental: {
+    // Enable server components caching
+    serverComponentsExternalPackages: ['mongoose', 'mongodb'],
+  },
   webpack: (config, { isServer }) => {
     // Handle MongoDB and native modules
     if (isServer) {
@@ -42,10 +59,6 @@ const nextConfig = {
 
     return config;
   },
-  experimental: {
-    // Enable server components caching
-    serverComponentsExternalPackages: ['mongoose', 'mongodb'],
-  },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

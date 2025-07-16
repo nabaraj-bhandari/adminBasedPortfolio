@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, Download, Github, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,58 +40,55 @@ export default function Home() {
   const [isLoadingSkills, setIsLoadingSkills] = useState(true);
 
   useEffect(() => {
-    const fetchPersonalInfo = async () => {
+    // Fetch all data in parallel for better performance
+    const fetchAllData = async () => {
       try {
-        const response = await fetch("/api/personal-info");
-        if (response.ok) {
-          const info = await response.json();
+        const [personalInfoResponse, featuredProjectsResponse, skillsResponse] =
+          await Promise.all([
+            fetch("/api/personal-info", {
+              cache: "no-store", // Always fetch fresh data
+            }),
+            fetch("/api/projects/featured", {
+              cache: "no-store", // Always fetch fresh data
+            }),
+            fetch("/api/skills", {
+              cache: "no-store", // Always fetch fresh data
+            }),
+          ]);
+
+        // Process personal info
+        if (personalInfoResponse.ok) {
+          const info = await personalInfoResponse.json();
           setPersonalInfo(info);
         }
-      } catch (error) {
-        console.error("Error fetching personal info:", error);
-      }
-    };
 
-    const fetchFeaturedProjects = async () => {
-      try {
-        console.log("Fetching featured projects...");
-        const response = await fetch("/api/projects/featured");
-        console.log("Featured projects response status:", response.status);
-        if (response.ok) {
-          const projects = await response.json();
-          console.log("Featured projects data:", projects);
+        // Process featured projects
+        if (featuredProjectsResponse.ok) {
+          const projects = await featuredProjectsResponse.json();
           setFeaturedProjects(projects);
         } else {
           console.error(
             "Failed to fetch featured projects:",
-            response.statusText
+            featuredProjectsResponse.statusText
           );
         }
-      } catch (error) {
-        console.error("Error fetching featured projects:", error);
-      } finally {
         setIsLoadingProjects(false);
-      }
-    };
 
-    const fetchSkills = async () => {
-      try {
-        const response = await fetch("/api/skills");
-        if (response.ok) {
-          const skillsData = await response.json();
-          // Get only top 6 skills for home page preview
-          setSkills(skillsData.slice(0, 6));
+        // Process skills
+        if (skillsResponse.ok) {
+          const skillsData = await skillsResponse.json();
+          // Get only top 4 skills for home page preview
+          setSkills(skillsData.slice(0, 4));
         }
+        setIsLoadingSkills(false);
       } catch (error) {
-        console.error("Error fetching skills:", error);
-      } finally {
+        console.error("Error fetching data:", error);
+        setIsLoadingProjects(false);
         setIsLoadingSkills(false);
       }
     };
 
-    fetchPersonalInfo();
-    fetchFeaturedProjects();
-    fetchSkills();
+    fetchAllData();
   }, []);
 
   return (
@@ -115,10 +113,15 @@ export default function Home() {
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-gradient-to-r from-primary to-purple-600 p-1">
                   <div className="w-full h-full rounded-full bg-background flex items-center justify-center overflow-hidden">
                     {personalInfo.profile_picture ? (
-                      <img
+                      <Image
                         src={personalInfo.profile_picture}
                         alt={personalInfo.full_name}
+                        width={160}
+                        height={160}
                         className="w-full h-full object-cover rounded-full"
+                        priority
+                        placeholder="blur"
+                        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8A0XqoFXDrOinP2rMZgNNuEV8XaM4mJgVJeg654EZWO5v2KjXZg=="
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary/20 to-purple-600/20 flex items-center justify-center rounded-full">
@@ -224,10 +227,14 @@ export default function Home() {
                         <CardContent className="p-6 flex flex-col h-full">
                           <div className="h-48 rounded-lg mb-4 overflow-hidden bg-gradient-to-br from-primary/10 to-purple-600/10 border border-border/50">
                             {project.image ? (
-                              <img
+                              <Image
                                 src={project.image}
                                 alt={project.title}
+                                width={400}
+                                height={192}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                placeholder="blur"
+                                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8A0XqoFXDrOinP2rMZgNNuEV8XaM4mJgVJeg654EZWO5v2KjXZg="
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
@@ -355,10 +362,10 @@ export default function Home() {
               Skills & Technologies
             </motion.h2>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
               {isLoadingSkills ? (
                 // Loading skeletons
-                [...Array(6)].map((_, i) => (
+                [...Array(4)].map((_, i) => (
                   <motion.div
                     key={i}
                     variants={fadeInUp}

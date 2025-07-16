@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://your-portfolio-domain.com/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1

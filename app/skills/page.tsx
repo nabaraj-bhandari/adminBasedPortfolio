@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Code, Database, Cloud, Brain, Wrench, Palette } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "@/components/ui/progress-simple";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { useState, useEffect } from "react";

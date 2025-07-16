@@ -97,6 +97,23 @@ const BlogPostSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const ContactMessageSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    subject: { type: String, required: true },
+    message: { type: String, required: true },
+    read: { type: Boolean, default: false },
+    replied: { type: Boolean, default: false },
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      default: "medium",
+    },
+  },
+  { timestamps: true }
+);
+
 // Models
 const PersonalInfo =
   mongoose.models.PersonalInfo ||
@@ -109,6 +126,9 @@ const AdditionalCompetency =
   mongoose.model("AdditionalCompetency", AdditionalCompetencySchema);
 const BlogPost =
   mongoose.models.BlogPost || mongoose.model("BlogPost", BlogPostSchema);
+const ContactMessage =
+  mongoose.models.ContactMessage ||
+  mongoose.model("ContactMessage", ContactMessageSchema);
 
 // Database operations
 export const dbOperations = {
@@ -400,6 +420,62 @@ export const dbOperations = {
       return false;
     }
   },
+
+  // Contact Messages
+  async createContactMessage(data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }): Promise<any | null> {
+    try {
+      await connectDB();
+      const contactMessage = new ContactMessage(data);
+      await contactMessage.save();
+      return contactMessage.toObject();
+    } catch (error) {
+      console.error("Error creating contact message:", error);
+      return null;
+    }
+  },
+
+  async getContactMessages(): Promise<any[]> {
+    try {
+      await connectDB();
+      const messages = await ContactMessage.find().sort({ createdAt: -1 });
+      return messages.map((message) => message.toObject());
+    } catch (error) {
+      console.error("Error fetching contact messages:", error);
+      return [];
+    }
+  },
+
+  async updateContactMessage(
+    id: string,
+    data: { read?: boolean; replied?: boolean; priority?: string }
+  ): Promise<any | null> {
+    try {
+      await connectDB();
+      const message = await ContactMessage.findByIdAndUpdate(id, data, {
+        new: true,
+      });
+      return message ? message.toObject() : null;
+    } catch (error) {
+      console.error("Error updating contact message:", error);
+      return null;
+    }
+  },
+
+  async deleteContactMessage(id: string): Promise<boolean> {
+    try {
+      await connectDB();
+      await ContactMessage.findByIdAndDelete(id);
+      return true;
+    } catch (error) {
+      console.error("Error deleting contact message:", error);
+      return false;
+    }
+  },
 };
 
-export { connectDB, PersonalInfo, Project, Skill, BlogPost };
+export { connectDB, PersonalInfo, Project, Skill, BlogPost, ContactMessage };

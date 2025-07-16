@@ -103,13 +103,32 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-      toast.success("Message sent successfully! I'll get back to you soon.");
-      reset();
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success(
+          result.message ||
+            "Message sent successfully! I'll get back to you soon."
+        );
+        reset();
+      } else {
+        toast.error(
+          result.error || "Failed to send message. Please try again."
+        );
+      }
     } catch (error) {
-      toast.error("Failed to send message. Please try again.");
+      console.error("Contact form error:", error);
+      toast.error(
+        "Failed to send message. Please check your connection and try again."
+      );
     } finally {
       setIsSubmitting(false);
     }

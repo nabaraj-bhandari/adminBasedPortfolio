@@ -5,7 +5,17 @@ import { verifyAdminAuthFromRequest } from "@/lib/auth";
 export async function GET() {
   try {
     const personalInfo = await dbOperations.getPersonalInfo();
-    return NextResponse.json(personalInfo);
+
+    const response = NextResponse.json(personalInfo);
+
+    // Add caching headers - personal info changes rarely
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=3600, stale-while-revalidate=7200"
+    );
+    response.headers.set("CDN-Cache-Control", "public, s-maxage=3600");
+
+    return response;
   } catch (error) {
     console.error("Error fetching personal info:", error);
     return NextResponse.json(
