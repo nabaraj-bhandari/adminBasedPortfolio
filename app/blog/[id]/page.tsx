@@ -1,53 +1,53 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, Clock, Tag, Share2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { toast } from 'sonner';
-import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import remarkGfm from 'remark-gfm';
-import Navbar from '@/components/navbar';
-import Footer from '@/components/footer';
-import { dbOperations } from '@/lib/supabase';
+"use client";
+import { apiService } from "@/lib/api-service";
+import type { BlogPost } from "@/types";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { ArrowLeft, Calendar, Clock, Tag, Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
+import remarkGfm from "remark-gfm";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, ease: 'easeOut' }
+  transition: { duration: 0.5, ease: "easeOut" },
 };
 
-export default function BlogPost() {
+export default function BlogPostPage() {
   const params = useParams();
   const router = useRouter();
-  const [post, setPost] = useState(null);
+  const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
-  const [relatedPosts, setRelatedPosts] = useState([]);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const postData = await dbOperations.getBlogPost(params.id);
+        const postData = await apiService.getBlogPost(params.id as string);
         if (postData && postData.published) {
           setPost(postData);
-          
+
           // Fetch related posts
-          const allPosts = await dbOperations.getBlogPosts();
+          const allPosts = await apiService.getBlogPosts();
           const related = allPosts
-            .filter(p => p.id !== params.id && p.published)
+            .filter((p: BlogPost) => p._id !== params.id && p.published)
             .slice(0, 3);
           setRelatedPosts(related);
         } else {
-          router.push('/blog');
+          router.push("/blog");
         }
       } catch (error) {
-        console.error('Error fetching blog post:', error);
-        router.push('/blog');
+        console.error("Error fetching blog post:", error);
+        router.push("/blog");
       } finally {
         setLoading(false);
       }
@@ -59,6 +59,8 @@ export default function BlogPost() {
   }, [params.id, router]);
 
   const handleShare = async () => {
+    if (!post) return;
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -67,11 +69,11 @@ export default function BlogPost() {
           url: window.location.href,
         });
       } catch (error) {
-        console.error('Error sharing:', error);
+        console.error("Error sharing:", error);
       }
     } else {
       navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard!');
+      toast.success("Link copied to clipboard!");
     }
   };
 
@@ -104,14 +106,10 @@ export default function BlogPost() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <article className="pt-24 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial="initial"
-            animate="animate"
-            variants={fadeInUp}
-          >
+          <motion.div initial="initial" animate="animate" variants={fadeInUp}>
             <Button
               variant="outline"
               onClick={() => router.back()}
@@ -125,14 +123,14 @@ export default function BlogPost() {
               <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 {post.title}
               </h1>
-              
+
               <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-6">
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
-                  {new Date(post.date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
+                  {new Date(post.date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </div>
                 <div className="flex items-center">
@@ -160,8 +158,8 @@ export default function BlogPost() {
               </div>
 
               <div className="relative overflow-hidden rounded-xl mb-8">
-                <img 
-                  src={post.image} 
+                <img
+                  src={post.image}
                   alt={post.title}
                   className="w-full h-64 md:h-96 object-cover"
                 />
@@ -175,24 +173,25 @@ export default function BlogPost() {
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
-                      code: ({ node, inline, className, children, ...props }) => {
-                        const match = /language-(\w+)/.exec(className || '');
-                        return !inline && match ? (
+                      code: ({ node, className, children, ...props }: any) => {
+                        const match = /language-(\w+)/.exec(className || "");
+                        const isInline = !match;
+                        return !isInline ? (
                           <SyntaxHighlighter
-                            style={tomorrow}
+                            style={tomorrow as any}
                             language={match[1]}
                             PreTag="div"
                             className="rounded-lg"
                             {...props}
                           >
-                            {String(children).replace(/\n$/, '')}
+                            {String(children).replace(/\n$/, "")}
                           </SyntaxHighlighter>
                         ) : (
                           <code className={className} {...props}>
                             {children}
                           </code>
                         );
-                      }
+                      },
                     }}
                   >
                     {post.content}
@@ -211,15 +210,15 @@ export default function BlogPost() {
                 <h2 className="text-2xl font-bold mb-8">Related Posts</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {relatedPosts.map((relatedPost) => (
-                    <Card 
-                      key={relatedPost.id} 
+                    <Card
+                      key={relatedPost._id}
                       className="group hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50 backdrop-blur-sm"
-                      onClick={() => router.push(`/blog/${relatedPost.id}`)}
+                      onClick={() => router.push(`/blog/${relatedPost._id}`)}
                     >
                       <CardContent className="p-0">
                         <div className="relative overflow-hidden rounded-t-lg">
-                          <img 
-                            src={relatedPost.image} 
+                          <img
+                            src={relatedPost.image}
                             alt={relatedPost.title}
                             className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
                           />
