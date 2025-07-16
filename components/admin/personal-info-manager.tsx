@@ -43,7 +43,12 @@ export default function PersonalInfoManager() {
   useEffect(() => {
     const fetchPersonalInfo = async () => {
       try {
-        const response = await fetch("/api/personal-info");
+        const response = await fetch("/api/personal-info", {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+          },
+        });
         if (response.ok) {
           const info = await response.json();
           setPersonalInfo(info);
@@ -100,10 +105,24 @@ export default function PersonalInfoManager() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(personalInfo),
+        cache: "no-store", // Ensure fresh data
       });
 
       if (response.ok) {
         toast.success("Personal information updated successfully!");
+
+        // Force refresh the data to show changes immediately
+        const refreshResponse = await fetch("/api/personal-info", {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+          },
+        });
+
+        if (refreshResponse.ok) {
+          const updatedInfo = await refreshResponse.json();
+          setPersonalInfo(updatedInfo);
+        }
       } else {
         throw new Error("Failed to update personal information");
       }

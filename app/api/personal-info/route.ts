@@ -8,12 +8,12 @@ export async function GET() {
 
     const response = NextResponse.json(personalInfo);
 
-    // Add caching headers - personal info changes rarely
+    // Reduced caching for admin changes - 5 minutes max
     response.headers.set(
       "Cache-Control",
-      "public, s-maxage=3600, stale-while-revalidate=7200"
+      "public, s-maxage=300, stale-while-revalidate=600"
     );
-    response.headers.set("CDN-Cache-Control", "public, s-maxage=3600");
+    response.headers.set("CDN-Cache-Control", "public, s-maxage=300");
 
     return response;
   } catch (error) {
@@ -35,7 +35,18 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const personalInfo = await dbOperations.updatePersonalInfo(body);
-    return NextResponse.json(personalInfo);
+
+    const response = NextResponse.json(personalInfo);
+
+    // No caching for PUT responses to ensure fresh data
+    response.headers.set(
+      "Cache-Control",
+      "no-cache, no-store, must-revalidate"
+    );
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+
+    return response;
   } catch (error) {
     console.error("Error updating personal info:", error);
     return NextResponse.json(
