@@ -68,7 +68,7 @@ A modern, full-stack portfolio website with a comprehensive admin panel for cont
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/admin-based-portfolio.git
+git clone https://github.com/yourusername/adminBasedPortfolio.git
 cd admin-based-portfolio
 ```
 
