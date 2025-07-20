@@ -19,7 +19,7 @@ A modern, full-stack portfolio website with a comprehensive admin panel for cont
 - **Blog System** - Full-featured blog with markdown support and publish/unpublish functionality
 - **SEO Optimized** - Meta tags, image optimization, and performance optimized
 
-### � Contact Management System
+### 📞 Contact Management System
 
 - **Contact Message Storage** - All messages saved to MongoDB with tracking
 - **Admin Message Management** - View, filter, and manage contact messages
@@ -28,7 +28,7 @@ A modern, full-stack portfolio website with a comprehensive admin panel for cont
 - **Priority System** - Mark messages as low, medium, or high priority
 - **Status Tracking** - Track read/unread and replied/unreplied status
 
-### �🛠️ Admin Panel Features
+### 🛠️ Admin Panel Features
 
 - **Secure Authentication** - Password-protected admin access
 - **Dashboard Analytics** - Overview of content, stats, and recent activity
