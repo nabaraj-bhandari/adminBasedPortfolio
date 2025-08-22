@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { apiService } from "@/lib/api-service";
-import type { PersonalInfo } from "@/types";
 
 interface PersonalInfoFooter {
   full_name: string;

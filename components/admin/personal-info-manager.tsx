@@ -274,7 +274,7 @@ export default function PersonalInfoManager() {
           </motion.div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           {/* Basic Information */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -282,15 +282,17 @@ export default function PersonalInfoManager() {
             transition={{ duration: 0.3 }}
           >
             <Card className="bg-card/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <User className="w-5 h-5 mr-2" />
+              <CardHeader className="p-4 lg:p-6">
+                <CardTitle className="flex items-center text-base lg:text-lg">
+                  <User className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                   Basic Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 lg:p-6 pt-0 space-y-4">
                 <div>
-                  <Label htmlFor="full_name">Full Name</Label>
+                  <Label htmlFor="full_name" className="text-sm">
+                    Full Name
+                  </Label>
                   <Input
                     id="full_name"
                     value={personalInfo.full_name}
@@ -298,21 +300,27 @@ export default function PersonalInfoManager() {
                       handleInputChange("full_name", e.target.value)
                     }
                     placeholder="Enter your full name"
+                    className="mt-1.5"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="title">Professional Title</Label>
+                  <Label htmlFor="title" className="text-sm">
+                    Professional Title
+                  </Label>
                   <Input
                     id="title"
                     value={personalInfo.title}
                     onChange={(e) => handleInputChange("title", e.target.value)}
                     placeholder="e.g., Computer Engineer & Full Stack Developer"
+                    className="mt-1.5"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="description">Bio/Description</Label>
+                  <Label htmlFor="description" className="text-sm">
+                    Bio/Description
+                  </Label>
                   <Textarea
                     id="description"
                     value={personalInfo.description}
@@ -321,12 +329,12 @@ export default function PersonalInfoManager() {
                     }
                     placeholder="Tell visitors about yourself, your expertise, and what you're passionate about..."
                     rows={4}
+                    className="mt-1.5"
                   />
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
-
+          </motion.div>{" "}
           {/* Contact Information */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -404,7 +412,6 @@ export default function PersonalInfoManager() {
               </CardContent>
             </Card>
           </motion.div>
-
           {/* Social Media Links */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

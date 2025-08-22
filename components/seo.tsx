@@ -16,11 +16,11 @@ interface SEOProps {
 }
 
 export function SEO({
-  title = "Portfolio - Full Stack Developer",
-  description = "Personal portfolio showcasing full-stack development projects, skills, and technical blog posts.",
-  keywords = "Portfolio, Full Stack Developer, Next.js, TypeScript, MongoDB, React, Web Development",
+  title = "Nabaraj Bhandari",
+  description = "Personal portfolio website of Nabaraj Bhandari.",
+  keywords = "Nabaraj, Bhandari, Nabaraj Bhandari, IOE, TU",
   image = "/og-image.jpg",
-  url = "https://your-portfolio-domain.com",
+  url = "https://nabaraj-bhandari.com.np",
   type = "website",
   publishedTime,
   modifiedTime,

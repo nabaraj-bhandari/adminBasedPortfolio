@@ -1,34 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbOperations } from "@/lib/mongodb";
 import { EmailService } from "@/lib/email-service";
+import { withErrorHandler, withValidation } from "@/lib/api-middleware";
+import { z } from "zod";
 
-export async function POST(request: NextRequest) {
-  try {
-    const { name, email, subject, message } = await request.json();
+// Define validation schema
+const contactSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  subject: z.string().min(1, "Subject is required"),
+  message: z.string().min(1, "Message is required")
+});
 
-    // Validate required fields
-    if (!name || !email || !subject || !message) {
-      return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 }
-      );
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "Please enter a valid email address" },
-        { status: 400 }
-      );
-    }
-
+export const POST = withErrorHandler(
+  withValidation(contactSchema, async (request: NextRequest, data) => {
     // Save to database
     const contactMessage = await dbOperations.createContactMessage({
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      subject: subject.trim(),
-      message: message.trim(),
+      name: data.name.trim(),
+      email: data.email.trim().toLowerCase(),
+      subject: data.subject.trim(),
+      message: data.message.trim(),
     });
 
     if (!contactMessage) {
@@ -39,12 +30,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the message
-    console.log("📧 New Contact Message Saved:");
-    console.log(`ID: ${contactMessage._id}`);
-    console.log(`From: ${contactMessage.name} (${contactMessage.email})`);
-    console.log(`Subject: ${contactMessage.subject}`);
-    console.log(`Time: ${new Date(contactMessage.createdAt).toLocaleString()}`);
-    console.log("---");
+    console.log("📧 New Contact Message Saved:", {
+      id: contactMessage._id,
+      from: `${contactMessage.name} (${contactMessage.email})`,
+      subject: contactMessage.subject,
+      time: new Date(contactMessage.createdAt).toLocaleString()
+    });
 
     // Send email notifications (don't fail the request if email fails)
     const emailData = {
@@ -56,13 +47,13 @@ export async function POST(request: NextRequest) {
     };
 
     // Send notification to admin
-    EmailService.sendContactNotificationToAdmin(emailData).catch((error) => {
-      console.error("Failed to send admin notification:", error);
+    EmailService.sendContactNotificationToAdmin(emailData).catch((err: Error) => {
+      console.error("Failed to send admin notification:", err);
     });
 
     // Send auto-reply to user
-    EmailService.sendContactAutoReply(emailData).catch((error) => {
-      console.error("Failed to send auto-reply:", error);
+    EmailService.sendContactAutoReply(emailData).catch((err: Error) => {
+      console.error("Failed to send auto-reply:", err);
     });
 
     return NextResponse.json(
@@ -73,32 +64,24 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Contact form submission error:", error);
-    return NextResponse.json(
-      { error: "Failed to send message. Please try again later." },
-      { status: 500 }
-    );
-  }
-}
+  })
+);
 
 // GET method to retrieve contact messages (for admin use)
-export async function GET() {
-  try {
-    const messages = await dbOperations.getContactMessages();
-    return NextResponse.json(
-      {
-        success: true,
-        messages,
-        count: messages.length,
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error fetching contact messages:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch messages" },
-      { status: 500 }
-    );
-  }
-}
+export const GET = withErrorHandler(async () => {
+  const messages = await dbOperations.getContactMessages();
+  return NextResponse.json(
+    {
+      success: true,
+      messages,
+      count: messages.length
+    },
+    { 
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    }
+  );
+});

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbOperations } from "@/lib/mongodb";
+import { getCachedData, createCacheKey } from "@/lib/cache-service";
+import { headers } from 'next/headers';
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,26 +9,18 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get("limit");
     const exclude = searchParams.get("exclude");
 
-    const posts = await dbOperations.getBlogPosts();
+    const featured = searchParams.get("featured");
+    
+    const options = {
+      limit: limit ? parseInt(limit, 10) : undefined,
+      excludeId: exclude || undefined,
+      featured: featured ? featured === 'true' : undefined
+    };
+    const posts = await dbOperations.getBlogPosts(options);
 
-    let filteredPosts = posts;
-
-    // Filter out excluded post
-    if (exclude) {
-      filteredPosts = posts.filter((post) => post._id.toString() !== exclude);
-    }
-
-    // Limit the results
-    if (limit) {
-      const limitNum = parseInt(limit, 10);
-      if (!isNaN(limitNum)) {
-        filteredPosts = filteredPosts.slice(0, limitNum);
-      }
-    }
-
-    return NextResponse.json(filteredPosts, {
+    return NextResponse.json(posts, {
       headers: {
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        "Cache-Control": "no-store", // Disable caching
       },
     });
   } catch (error) {

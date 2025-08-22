@@ -11,7 +11,8 @@ import {
   Edit,
   User,
   Mail,
-  Settings,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +21,7 @@ import SkillManager from "./skill-manager";
 import BlogManager from "./blog-manager";
 import PersonalInfoManager from "./personal-info-manager";
 import ContactMessageManager from "./contact-message-manager";
-import EmailTestPanel from "./email-test-panel";
+
 import LogoutButton from "./logout-button";
 
 type TabType =
@@ -29,11 +30,11 @@ type TabType =
   | "skills"
   | "blog"
   | "personal"
-  | "contact"
-  | "settings";
+  | "contact";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [stats, setStats] = useState({
     totalProjects: 0,
     featuredProjects: 0,
@@ -77,7 +78,6 @@ export default function AdminDashboard() {
     { id: "skills", name: "Skills", icon: Code },
     { id: "blog", name: "Blog", icon: BookOpen },
     { id: "contact", name: "Contact Messages", icon: Mail },
-    { id: "settings", name: "Settings", icon: Settings },
   ];
 
   // Create display stats from real data
@@ -116,25 +116,25 @@ export default function AdminDashboard() {
         return <BlogManager />;
       case "contact":
         return <ContactMessageManager />;
-      case "settings":
-        return <EmailTestPanel />;
       default:
         return (
           <div className="space-y-6">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               {displayStats.map((stat) => (
                 <Card key={stat.name} className="bg-card/50 backdrop-blur-sm">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 lg:p-6">
                     <div className="flex items-center">
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-muted-foreground">
+                        <p className="text-xs lg:text-sm font-medium text-muted-foreground">
                           {stat.name}
                         </p>
-                        <p className="text-2xl font-bold">{stat.value}</p>
+                        <p className="text-lg lg:text-2xl font-bold">
+                          {stat.value}
+                        </p>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-[10px] lg:text-xs text-muted-foreground mt-2">
                       {stat.change}
                     </p>
                   </CardContent>
@@ -143,11 +143,11 @@ export default function AdminDashboard() {
             </div>
 
             {/* Recent Activity Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
               {/* Latest Projects */}
               <Card className="bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">
+                <CardContent className="p-4 lg:p-6">
+                  <h3 className="text-base lg:text-lg font-semibold mb-4">
                     Latest Projects
                   </h3>
                   {isLoadingStats ? (
@@ -166,10 +166,10 @@ export default function AdminDashboard() {
                           key={index}
                           className="flex justify-between items-center"
                         >
-                          <span className="text-sm truncate">
+                          <span className="text-xs lg:text-sm truncate max-w-[60%]">
                             {project.title}
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] lg:text-xs text-muted-foreground">
                             {new Date(project.createdAt).toLocaleDateString()}
                           </span>
                         </div>
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
                         variant="outline"
                         onClick={() => setActiveTab("projects")}
                       >
-                        Add your first project
+                        Add Project
                       </Button>
                     </div>
                   )}
@@ -194,8 +194,8 @@ export default function AdminDashboard() {
 
               {/* Latest Blog Posts */}
               <Card className="bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">
+                <CardContent className="p-4 lg:p-6">
+                  <h3 className="text-base lg:text-lg font-semibold mb-4">
                     Latest Blog Posts
                   </h3>
                   {isLoadingStats ? (
@@ -212,19 +212,19 @@ export default function AdminDashboard() {
                       {stats.latestBlogs.map((blog: any, index) => (
                         <div
                           key={index}
-                          className="flex justify-between items-center"
+                          className="flex justify-between items-center gap-2"
                         >
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm truncate">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-xs lg:text-sm truncate">
                               {blog.title}
                             </span>
                             {blog.published && (
-                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                              <span className="text-[10px] lg:text-xs shrink-0 bg-green-100 text-green-800 px-2 py-0.5 rounded">
                                 Published
                               </span>
                             )}
                           </div>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] lg:text-xs text-muted-foreground whitespace-nowrap">
                             {new Date(blog.createdAt).toLocaleDateString()}
                           </span>
                         </div>
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
                         variant="outline"
                         onClick={() => setActiveTab("blog")}
                       >
-                        Write your first post
+                        Write Post
                       </Button>
                     </div>
                   )}
@@ -250,16 +250,18 @@ export default function AdminDashboard() {
 
             {/* Skill Categories */}
             {!isLoadingStats && stats.skillCategories.length > 0 && (
-              <Card className="bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">
+              <Card className="mt-6 bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-4 lg:p-6">
+                  <h3 className="text-base lg:text-lg font-semibold mb-4">
                     Skills by Category
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {stats.skillCategories.map((category: any, index) => (
                       <div key={index} className="text-center">
-                        <p className="text-2xl font-bold">{category.count}</p>
-                        <p className="text-sm text-muted-foreground capitalize">
+                        <p className="text-lg lg:text-2xl font-bold">
+                          {category.count}
+                        </p>
+                        <p className="text-xs lg:text-sm text-muted-foreground capitalize">
                           {category._id}
                         </p>
                       </div>
@@ -271,10 +273,10 @@ export default function AdminDashboard() {
 
             {/* No Skills Message */}
             {!isLoadingStats && stats.skillCategories.length === 0 && (
-              <Card className="bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-6">
+              <Card className="mt-6 bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-4 lg:p-6">
                   <div className="text-center py-4">
-                    <h3 className="text-lg font-semibold mb-2">
+                    <h3 className="text-base lg:text-lg font-semibold mb-2">
                       Skills by Category
                     </h3>
                     <p className="text-muted-foreground text-sm mb-4">
@@ -285,7 +287,7 @@ export default function AdminDashboard() {
                       variant="outline"
                       onClick={() => setActiveTab("skills")}
                     >
-                      Add your first skill
+                      Add Skill
                     </Button>
                   </div>
                 </CardContent>
@@ -293,43 +295,45 @@ export default function AdminDashboard() {
             )}
 
             {/* Quick Actions */}
-            <Card className="bg-card/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+            <Card className="mt-6 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="p-4 lg:p-6">
+                <CardTitle className="text-base lg:text-lg">
+                  Quick Actions
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <CardContent className="p-4 lg:p-6 pt-0">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <Button
                     variant="outline"
-                    className="h-20 flex flex-col gap-2"
+                    className="h-16 lg:h-20 flex flex-col gap-2"
                     onClick={() => setActiveTab("projects")}
                   >
-                    <Plus className="w-5 h-5" />
-                    Add Project
+                    <Plus className="w-4 h-4 lg:w-5 lg:h-5" />
+                    <span className="text-xs lg:text-sm">Add Project</span>
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-20 flex flex-col gap-2"
+                    className="h-16 lg:h-20 flex flex-col gap-2"
                     onClick={() => setActiveTab("blog")}
                   >
-                    <Edit className="w-5 h-5" />
-                    Write Post
+                    <Edit className="w-4 h-4 lg:w-5 lg:h-5" />
+                    <span className="text-xs lg:text-sm">Write Post</span>
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-20 flex flex-col gap-2"
+                    className="h-16 lg:h-20 flex flex-col gap-2"
                     onClick={() => setActiveTab("skills")}
                   >
-                    <Code className="w-5 h-5" />
-                    Add Skill
+                    <Code className="w-4 h-4 lg:w-5 lg:h-5" />
+                    <span className="text-xs lg:text-sm">Add Skill</span>
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-20 flex flex-col gap-2"
+                    className="h-16 lg:h-20 flex flex-col gap-2"
                     onClick={() => setActiveTab("personal")}
                   >
-                    <User className="w-5 h-5" />
-                    Edit Profile
+                    <User className="w-4 h-4 lg:w-5 lg:h-5" />
+                    <span className="text-xs lg:text-sm">Edit Profile</span>
                   </Button>
                 </div>
               </CardContent>
@@ -341,15 +345,45 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
+      <div className="flex flex-col lg:flex-row">
+        {/* Mobile Header */}
+        <div className="lg:hidden flex items-center justify-between p-4 border-b border-border">
+          <h1 className="text-xl font-semibold">Admin Panel</h1>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
+
+        {/* Sidebar - Mobile & Desktop */}
+        <div
+          className={`
+          ${mobileNavOpen ? "fixed inset-0 z-50 bg-background" : "hidden"} 
+          lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0
+        `}
+        >
           <div className="flex flex-col flex-grow pt-5 bg-card border-r border-border overflow-y-auto">
-            <div className="flex items-center flex-shrink-0 px-4">
+            {/* Mobile Close Button */}
+            {mobileNavOpen && (
+              <div className="lg:hidden flex justify-end px-4 mb-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+            )}
+
+            <div className="flex items-center flex-shrink-0 px-4 mb-8">
               <h1 className="text-xl font-semibold">Admin Panel</h1>
             </div>
 
-            <nav className="mt-8 flex-1 px-4">
+            <nav className="flex-1 px-4">
               <ul className="space-y-1">
                 {navigation.map((item) => {
                   const Icon = item.icon;
@@ -358,7 +392,10 @@ export default function AdminDashboard() {
                   return (
                     <li key={item.name}>
                       <button
-                        onClick={() => setActiveTab(item.id as TabType)}
+                        onClick={() => {
+                          setActiveTab(item.id as TabType);
+                          setMobileNavOpen(false);
+                        }}
                         className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors ${
                           isActive
                             ? "bg-primary text-primary-foreground"
@@ -390,18 +427,17 @@ export default function AdminDashboard() {
             className="p-4 lg:p-8"
           >
             <div className="mb-8">
-              <h1 className="text-3xl font-bold">
+              <h1 className="text-2xl lg:text-3xl font-bold">
                 {navigation.find((item) => item.id === activeTab)?.name}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm lg:text-base text-muted-foreground">
                 {activeTab === "dashboard" &&
-                  "Manage your portfolio content and view analytics"}
-                {activeTab === "personal" &&
-                  "Update your personal information and contact details"}
-                {activeTab === "projects" && "Manage your portfolio projects"}
-                {activeTab === "skills" &&
-                  "Organize your technical skills and expertise"}
-                {activeTab === "blog" && "Create and manage your blog posts"}
+                  "Portfolio overview and analytics"}
+                {activeTab === "personal" && "Personal information"}
+                {activeTab === "projects" && "Project management"}
+                {activeTab === "skills" && "Skills management"}
+                {activeTab === "blog" && "Blog management"}
+                {activeTab === "contact" && "Contact messages"}
               </p>
             </div>
 

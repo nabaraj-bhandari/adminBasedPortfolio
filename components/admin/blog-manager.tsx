@@ -23,12 +23,7 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import rehypeRaw from "rehype-raw";
 import { BlogPost } from "@/types";
-
-const mockPosts: BlogPost[] = [];
 
 export default function BlogManager() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -43,6 +38,7 @@ export default function BlogManager() {
     tags: "",
     read_time: "",
     published: false,
+    pdfs: [] as Array<{ title: string; url: string; downloadCount?: number }>,
   });
 
   // Fetch blog posts
@@ -67,6 +63,26 @@ export default function BlogManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const validPdfs = (formData.pdfs || []).filter((pdf) => {
+      if (!pdf.title || !pdf.url) return false;
+
+      const isGoogleDriveUrl =
+        pdf.url.includes("drive.google.com") &&
+        (pdf.url.includes("/file/d/") || pdf.url.includes("?id="));
+      return isGoogleDriveUrl;
+    });
+
+    // Check if any PDFs were removed due to validation
+    const invalidPdfs = (formData.pdfs || []).filter((pdf) => {
+      if (!pdf.title || !pdf.url) return false;
+      return !pdf.url.includes("drive.google.com");
+    });
+
+    if (invalidPdfs.length > 0) {
+      toast.error("Invalid PDF links found. Please use Google Drive links.");
+      return; // Prevent form submission if there are invalid PDFs
+    }
+
     const postData = {
       title: formData.title,
       excerpt: formData.excerpt,
@@ -75,6 +91,12 @@ export default function BlogManager() {
       tags: formData.tags.split(",").map((tag) => tag.trim()),
       read_time: formData.read_time,
       published: formData.published,
+      pdfs: validPdfs.map((pdf) => ({
+        title: pdf.title.trim(),
+        url: pdf.url.trim(),
+        downloadCount: pdf.downloadCount || 0,
+      })),
+      date: editingPost?.date || new Date(),
     };
 
     try {
@@ -121,6 +143,7 @@ export default function BlogManager() {
       tags: "",
       read_time: "",
       published: false,
+      pdfs: [],
     });
   };
 
@@ -134,6 +157,12 @@ export default function BlogManager() {
       tags: post.tags.join(", "),
       read_time: post.read_time,
       published: post.published,
+      pdfs:
+        post.pdfs?.map((pdf) => ({
+          title: pdf.title,
+          url: pdf.url,
+          downloadCount: pdf.downloadCount || 0,
+        })) || [],
     });
     setIsDialogOpen(true);
   };
@@ -158,10 +187,22 @@ export default function BlogManager() {
       const post = posts.find((p) => p._id === id);
       if (!post) return;
 
+      // Prepare the update data, preserving all existing post data
+      const updateData = {
+        ...post,
+        published: !post.published,
+        pdfs:
+          post.pdfs?.map((pdf) => ({
+            title: pdf.title,
+            url: pdf.url,
+            downloadCount: pdf.downloadCount || 0,
+          })) || [],
+      };
+
       const response = await fetch(`/api/blog/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...post, published: !post.published }),
+        body: JSON.stringify(updateData),
       });
 
       if (response.ok) {
@@ -171,6 +212,7 @@ export default function BlogManager() {
       }
     } catch (error) {
       console.error("Error updating post status:", error);
+      toast.error("Failed to update post status");
     }
   };
 
@@ -185,14 +227,14 @@ export default function BlogManager() {
               Add Post
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-[90vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingPost ? "Edit Blog Post" : "Add New Blog Post"}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="title">Title</Label>
                   <Input
@@ -255,6 +297,95 @@ export default function BlogManager() {
                     placeholder="React, Node.js, MongoDB"
                     required
                   />
+                </div>
+              </div>
+
+              {/* PDF Management Section */}
+              <div>
+                <Label>PDF Attachments</Label>
+                <div className="space-y-4">
+                  {formData.pdfs?.map((pdf, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 border rounded-md"
+                    >
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <Label htmlFor={`pdf-title-${index}`}>Title</Label>
+                          <Input
+                            id={`pdf-title-${index}`}
+                            value={pdf.title}
+                            onChange={(e) => {
+                              const newPdfs = [...(formData.pdfs || [])];
+                              newPdfs[index] = {
+                                ...pdf,
+                                title: e.target.value.trim(),
+                              };
+                              setFormData({ ...formData, pdfs: newPdfs });
+                            }}
+                            placeholder="PDF Title"
+                            className="mb-2"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`pdf-url-${index}`}>URL</Label>
+                          <Input
+                            id={`pdf-url-${index}`}
+                            value={pdf.url}
+                            onChange={(e) => {
+                              const newPdfs = [...(formData.pdfs || [])];
+                              newPdfs[index] = {
+                                ...pdf,
+                                url: e.target.value.trim(),
+                                downloadCount: pdf.downloadCount || 0,
+                              };
+                              setFormData({ ...formData, pdfs: newPdfs });
+                            }}
+                            placeholder="https://drive.google.com/file/d/..."
+                            pattern=".*drive\.google\.com.*"
+                            title="Please enter a Google Drive link"
+                          />
+                        </div>
+                        {pdf.downloadCount !== undefined &&
+                          pdf.downloadCount > 0 && (
+                            <p className="text-sm text-muted-foreground">
+                              Downloads: {pdf.downloadCount}
+                            </p>
+                          )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          const newPdfs = formData.pdfs?.filter(
+                            (_, i) => i !== index
+                          );
+                          setFormData({ ...formData, pdfs: newPdfs });
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          pdfs: [
+                            ...(formData.pdfs || []),
+                            { title: "", url: "", downloadCount: 0 },
+                          ],
+                        });
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add PDF
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -353,19 +484,22 @@ export default function BlogManager() {
             transition={{ duration: 0.3 }}
           >
             <Card>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="text-lg font-semibold">{post.title}</h3>
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <h3 className="text-base lg:text-lg font-semibold line-clamp-1">
+                      {post.title}
+                    </h3>
                     <Badge variant={post.published ? "default" : "secondary"}>
                       {post.published ? "Published" : "Draft"}
                     </Badge>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 self-end sm:self-start">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => handleEdit(post)}
+                      className="h-8 w-8 p-0"
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -373,6 +507,7 @@ export default function BlogManager() {
                       size="sm"
                       variant="outline"
                       onClick={() => post._id && togglePublished(post._id)}
+                      className="h-8 w-8 p-0"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -380,14 +515,13 @@ export default function BlogManager() {
                       size="sm"
                       variant="outline"
                       onClick={() => post._id && handleDelete(post._id)}
+                      className="h-8 w-8 p-0"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
-                </div>
-
+                </div>{" "}
                 <p className="text-muted-foreground mb-4">{post.excerpt}</p>
-
                 <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-1" />
@@ -400,7 +534,6 @@ export default function BlogManager() {
                     {post.read_time}
                   </div>
                 </div>
-
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
                     <Badge key={tag} variant="secondary" className="text-xs">

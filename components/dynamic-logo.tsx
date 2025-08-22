@@ -13,7 +13,9 @@ let cachedLogoText: string | null = null;
 let isFetching = false;
 
 export default function DynamicLogo({ className = "" }: DynamicLogoProps) {
-  const [logoText, setLogoText] = useState(cachedLogoText || "Portfolio");
+  const [logoText, setLogoText] = useState(
+    cachedLogoText || "Nabaraj Bhandari"
+  );
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -28,7 +30,9 @@ export default function DynamicLogo({ className = "" }: DynamicLogoProps) {
           const response = await fetch("/api/personal-info");
           if (response.ok) {
             const info = await response.json();
-            const processedText = getLogoText(info.full_name || "Portfolio");
+            const processedText = getLogoText(
+              info.full_name || "Nabaraj Bhandari"
+            );
             cachedLogoText = processedText;
             setLogoText(processedText);
           }
@@ -55,7 +59,9 @@ export default function DynamicLogo({ className = "" }: DynamicLogoProps) {
   };
 
   if (!mounted) {
-    return <div className={`text-2xl font-bold ${className}`}>Portfolio</div>;
+    return (
+      <div className={`text-2xl font-bold ${className}`}>Nabaraj Bhandari</div>
+    );
   }
 
   // Create gradient classes based on theme

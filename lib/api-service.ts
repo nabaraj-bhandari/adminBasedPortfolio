@@ -1,4 +1,9 @@
-import { PersonalInfo, Project, BlogPost } from "@/types";
+import type {
+  PersonalInfo,
+  Project,
+  BlogPost,
+  Skill,
+} from "@/types";
 
 // Client-side API service
 export const apiService = {
@@ -34,7 +39,12 @@ export const apiService = {
   // Projects
   async getProjects(): Promise<Project[]> {
     try {
-      const response = await fetch("/api/projects");
+      const response = await fetch("/api/projects", {
+        next: { 
+          revalidate: 3600, // Cache for 1 hour
+          tags: ['projects']
+        }
+      });
       if (!response.ok) throw new Error("Failed to fetch");
       return await response.json();
     } catch (error) {
@@ -58,13 +68,26 @@ export const apiService = {
   async getBlogPost(id: string): Promise<BlogPost | null> {
     try {
       const response = await fetch(`/api/blog/${id}`, {
-        next: { revalidate: 300 }, // Cache for 5 minutes
+        cache: 'no-store' // Disable caching
       });
       if (!response.ok) throw new Error("Failed to fetch");
       return await response.json();
     } catch (error) {
       console.error("Error fetching blog post:", error);
       return null;
+    }
+  },
+
+  async getSkills(): Promise<Skill[]> {
+    try {
+      const response = await fetch("/api/skills", {
+        next: { revalidate: 3600 }, // Cache for 1 hour
+      });
+      if (!response.ok) throw new Error("Failed to fetch");
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching skills:", error);
+      return [];
     }
   },
 };

@@ -83,7 +83,11 @@
     /* Ensure proper color scheme inheritance */
     color-scheme: light dark;
     /* Subtle gradient overlay for seamless appearance */
-    background-image: radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.02) 0%, transparent 50%);
+    background-image: radial-gradient(
+      circle at 50% 50%,
+      hsl(var(--primary) / 0.02) 0%,
+      transparent 50%
+    );
     background-attachment: fixed;
   }
 }
@@ -99,35 +103,49 @@
 }
 
 .section-divider::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 60px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, hsl(var(--border)), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--border)),
+    transparent
+  );
 }
 
 /* Hero section specific styling */
 .hero-section {
-  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.3) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(var(--background)) 0%,
+    hsl(var(--muted) / 0.3) 100%
+  );
   min-height: 100vh;
   min-height: 100dvh; /* Dynamic viewport height for mobile */
 }
 
 /* Alternating section backgrounds */
 .section-alternate {
-  background: linear-gradient(to bottom, hsl(var(--muted) / 0.15), hsl(var(--muted) / 0.25));
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--muted) / 0.15),
+    hsl(var(--muted) / 0.25)
+  );
 }
 
 /* Skills section blending with adjacent sections */
 .skills-section {
-  background: linear-gradient(to bottom, 
-    hsl(var(--muted) / 0.25) 0%, 
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--muted) / 0.25) 0%,
     hsl(var(--muted) / 0.15) 10%,
-    hsl(var(--background)) 25%, 
-    hsl(var(--background)) 75%, 
+    hsl(var(--background)) 25%,
+    hsl(var(--background)) 75%,
     hsl(var(--muted) / 0.15) 90%,
     hsl(var(--background)) 100%
   );
@@ -203,12 +221,26 @@
 }
 
 /* Apply to common display elements */
-h1, h2, h3, h4, h5, h6, 
-.text-4xl, .text-3xl, .text-2xl, .text-xl, .text-lg,
-nav, .navbar, .footer,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.text-4xl,
+.text-3xl,
+.text-2xl,
+.text-xl,
+.text-lg,
+nav,
+.navbar,
+.footer,
 button:not(.prose button),
-.card-title, .card-header,
-.badge, .chip, .tag {
+.card-title,
+.card-header,
+.badge,
+.chip,
+.tag {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -216,11 +248,15 @@ button:not(.prose button),
 }
 
 /* Allow text selection in content areas */
-.prose, .prose *, 
-textarea, input, 
+.prose,
+.prose *,
+textarea,
+input,
 .selectable,
-article, .article-content,
-.blog-content, .markdown-content {
+article,
+.article-content,
+.blog-content,
+.markdown-content {
   -webkit-user-select: text !important;
   -moz-user-select: text !important;
   -ms-user-select: text !important;
@@ -320,6 +356,35 @@ article, .article-content,
   @apply italic;
 }
 
+/* Blog specific styles */
+.tag-badge {
+  @apply text-xs sm:text-sm;
+}
+
+.tag-icon {
+  @apply w-2 h-2 sm:w-3 sm:h-3 mr-1;
+}
+
+.blog-header-image {
+  @apply relative overflow-hidden rounded-lg sm:rounded-xl mb-6 sm:mb-8;
+}
+
+.blog-card {
+  @apply bg-card/50 backdrop-blur-sm;
+}
+
+.blog-markdown {
+  @apply p-4 sm:p-6 lg:p-8;
+}
+
+.blog-pdf-section {
+  @apply mt-8 space-y-4;
+}
+
+.blog-pdf-item {
+  @apply p-4 rounded-lg border border-border bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -339,7 +404,8 @@ article, .article-content,
 
 /* Smooth transitions */
 * {
-  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 /* Animation fallbacks for better browser compatibility */

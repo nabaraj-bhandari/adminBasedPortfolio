@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Github, ExternalLink, Calendar, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import { apiService } from "@/lib/api-service";
+import { useProjects } from "@/hooks/use-cached-data";
 import { Project } from "@/types";
 
 const fadeInUp = {
@@ -18,23 +17,7 @@ const fadeInUp = {
 };
 
 export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const projectsData = await apiService.getProjects();
-        setProjects(projectsData);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, []);
+  const { projects, isLoading: loading, error } = useProjects();
 
   return (
     <div className="min-h-screen bg-background">
@@ -70,7 +53,7 @@ export default function Projects() {
                 </div>
               ))}
             </div>
-          ) : projects.length > 0 ? (
+          ) : projects && projects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {projects.map((project, index) => (
                 <motion.div

@@ -12,42 +12,34 @@ if (typeof window !== "undefined") {
   throw new Error("MongoDB connection should only be used on server side");
 }
 
+import { connectToDatabase } from './db-connection';
+
 // MongoDB connection
 const connectDB = async () => {
   try {
-    if (mongoose.connections[0].readyState) {
-      return;
-    }
-
-    const conn = await mongoose.connect(
-      process.env.MONGODB_URI || "mongodb://localhost:27017/portfolio"
-    );
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    const conn = await connectToDatabase();
+    return conn;
   } catch (error) {
     console.error("MongoDB connection error:", error);
-    process.exit(1);
+    throw error;
   }
 };
 
 // Schemas
 const PersonalInfoSchema = new mongoose.Schema(
   {
-    full_name: { type: String, default: "Your Name" },
-    title: { type: String, default: "AI/ML Developer" },
-    description: {
-      type: String,
-      default:
-        "Building intelligent systems and sharing knowledge through code.",
-    },
-    email: { type: String, default: "your.email@example.com" },
-    phone: { type: String, default: "+1 (555) 123-4567" },
-    location: { type: String, default: "San Francisco, CA" },
-    resume_url: { type: String, default: "#" },
-    profile_picture: { type: String, default: "" },
-    github: { type: String, default: "https://github.com/yourusername" },
-    linkedin: { type: String, default: "https://linkedin.com/in/yourusername" },
-    twitter: { type: String, default: "https://twitter.com/yourusername" },
-    website: { type: String, default: "https://yourwebsite.com" },
+    full_name: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: String },
+    location: { type: String },
+    resume_url: { type: String },
+    profile_picture: { type: String },
+    github: { type: String },
+    linkedin: { type: String },
+    twitter: { type: String },
+    website: { type: String },
   },
   { timestamps: true }
 );
@@ -83,6 +75,13 @@ const AdditionalCompetencySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// PDF Schema for blog posts
+const PdfSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  url: { type: String, required: true },
+  downloadCount: { type: Number, default: 0 },
+});
+
 const BlogPostSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
@@ -93,8 +92,18 @@ const BlogPostSchema = new mongoose.Schema(
     date: { type: Date, default: Date.now },
     read_time: { type: String, default: "5 min read" },
     published: { type: Boolean, default: false },
+    featured: { type: Boolean, default: false },
+    views: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
+    pdfs: { type: [PdfSchema], default: [] }, // Add PDFs array
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    index: [
+      { published: 1, featured: 1, date: -1 },
+      { published: 1, date: -1 }
+    ]
+  }
 );
 
 const ContactMessageSchema = new mongoose.Schema(
@@ -350,11 +359,30 @@ export const dbOperations = {
   },
 
   // Blog Posts
-  async getBlogPosts() {
+  async getBlogPosts(options: { limit?: number; excludeId?: string; featured?: boolean } = {}) {
     try {
       await connectDB();
-      const posts = await BlogPost.find({ published: true }).sort({ date: -1 });
-      return posts.map((post) => post.toObject());
+      let query: Record<string, any> = { published: true };
+      
+      // Add featured filter if specified
+      if (options.featured !== undefined) {
+        query.featured = options.featured;
+      }
+      
+      // Exclude specific post if needed
+      if (options.excludeId) {
+        query._id = { $ne: options.excludeId };
+      }
+      
+      let postsQuery = BlogPost.find(query).sort({ date: -1 });
+      
+      // Apply limit if specified
+      if (options.limit) {
+        postsQuery = postsQuery.limit(options.limit);
+      }
+      
+      const posts = await postsQuery;
+      return posts.map(post => post.toObject());
     } catch (error) {
       console.error("Error fetching blog posts:", error);
       return [];
@@ -364,10 +392,28 @@ export const dbOperations = {
   async getAllBlogPosts() {
     try {
       await connectDB();
-      const posts = await BlogPost.find().sort({ date: -1 });
+      const posts = await BlogPost.find()
+        .sort({ featured: -1, date: -1 })
+        .collation({ locale: 'en_US', numericOrdering: true });
       return posts.map((post) => post.toObject());
     } catch (error) {
       console.error("Error fetching all blog posts:", error);
+      return [];
+    }
+  },
+  
+  async getFeaturedBlogPosts(limit = 3) {
+    try {
+      await connectDB();
+      const posts = await BlogPost.find({ 
+        published: true,
+        featured: true 
+      })
+        .sort({ date: -1 })
+        .limit(limit);
+      return posts.map(post => post.toObject());
+    } catch (error) {
+      console.error("Error fetching featured blog posts:", error);
       return [];
     }
   },
@@ -388,7 +434,13 @@ export const dbOperations = {
   ): Promise<BlogPost | null> {
     try {
       await connectDB();
-      const post = await BlogPost.create(data);
+      const post = await BlogPost.create({
+        ...data,
+        pdfs: data.pdfs?.map(pdf => ({
+          ...pdf,
+          downloadCount: pdf.downloadCount || 0
+        }))
+      });
       return post.toObject();
     } catch (error) {
       console.error("Error creating blog post:", error);
@@ -402,11 +454,37 @@ export const dbOperations = {
   ): Promise<BlogPost | null> {
     try {
       await connectDB();
-      const post = await BlogPost.findByIdAndUpdate(id, data, { new: true });
+      
+      const updateData = { ...data };
+
+      // If pdfs are being updated, ensure proper structure and preserve download counts
+      if (data.pdfs) {
+        const existingPost = await BlogPost.findById(id);
+        if (existingPost) {
+          updateData.pdfs = data.pdfs.map(newPdf => {
+            const existingPdf: { title: string; url: string; downloadCount: number } | undefined = existingPost.pdfs?.find((p: { url: string }) => p.url === newPdf.url);
+            return {
+              title: newPdf.title?.trim(),
+              url: newPdf.url?.trim(),
+              downloadCount: existingPdf?.downloadCount || newPdf.downloadCount || 0
+            };
+          });
+        }
+      }
+
+      // Use runValidators to ensure schema validation is applied during update
+      const post = await BlogPost.findByIdAndUpdate(
+        id, 
+        updateData, 
+        { 
+          new: true,
+          runValidators: true
+        }
+      );
       return post ? post.toObject() : null;
     } catch (error) {
       console.error("Error updating blog post:", error);
-      return null;
+      throw error; // Let the API handle the error response
     }
   },
 
@@ -418,6 +496,26 @@ export const dbOperations = {
     } catch (error) {
       console.error("Error deleting blog post:", error);
       return false;
+    }
+  },
+
+  // Update PDF download count
+  async updatePdfDownloadCount(postId: string, pdfUrl: string): Promise<BlogPost | null> {
+    try {
+      await connectDB();
+      const post = await BlogPost.findById(postId);
+      if (!post) return null;
+
+      const pdfIndex = (post.pdfs as { url: string }[] | undefined)?.findIndex((p: { url: string }) => p.url === pdfUrl);
+      if (typeof pdfIndex !== "number" || pdfIndex < 0) return null;
+
+      post.pdfs[pdfIndex].downloadCount = (post.pdfs[pdfIndex].downloadCount || 0) + 1;
+      await post.save();
+
+      return post.toObject();
+    } catch (error) {
+      console.error("Error updating PDF download count:", error);
+      return null;
     }
   },
 

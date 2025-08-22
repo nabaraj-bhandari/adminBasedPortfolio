@@ -348,7 +348,7 @@ export default function SkillManager() {
             </Dialog>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
             {isLoadingSkills
               ? // Loading skeleton for skills
                 Array.from({ length: 6 }).map((_, index) => (
@@ -403,11 +403,11 @@ export default function SkillManager() {
                             {category.skills.map((skill) => (
                               <div
                                 key={skill._id}
-                                className="flex items-center justify-between"
+                                className="flex flex-col sm:flex-row sm:items-center gap-2"
                               >
-                                <div className="flex-1">
-                                  <div className="flex justify-between items-center mb-1">
-                                    <span className="text-sm font-medium">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-1">
+                                    <span className="text-sm font-medium truncate">
                                       {skill.name}
                                     </span>
                                     <span className="text-xs text-muted-foreground">

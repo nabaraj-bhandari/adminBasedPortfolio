@@ -1,11 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbOperations } from "@/lib/mongodb";
 import { verifyAdminAuthFromRequest } from "@/lib/auth";
+import { getCachedData } from "@/lib/cache-service";
+import { headers } from 'next/headers';
 
 export async function GET() {
   try {
-    const projects = await dbOperations.getProjects();
-    return NextResponse.json(projects);
+    const projects = await getCachedData(
+      'projects:all',
+      async () => await dbOperations.getProjects(),
+      {
+        revalidate: 3600, // 1 hour
+        tags: ['projects']
+      }
+    );
+    
+    // Add cache control headers
+    const headersList = headers();
+    return NextResponse.json(projects, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    });
   } catch (error) {
     console.error("Error fetching projects:", error);
     return NextResponse.json(

@@ -59,6 +59,11 @@ export interface BlogPost {
   date: Date;
   read_time: string;
   published: boolean;
+  pdfs?: Array<{
+    title: string;
+    url: string;
+    downloadCount?: number;
+  }>;
   createdAt?: Date;
   updatedAt?: Date;
 }
