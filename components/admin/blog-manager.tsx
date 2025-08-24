@@ -423,6 +423,11 @@ export default function BlogManager() {
                   <TabsContent value="preview">
                     <div className="border rounded-lg p-4 h-80 overflow-y-auto prose prose-sm max-w-none dark:prose-invert">
                       <ReactMarkdown
+                        remarkPlugins={[remarkGfm, require("remark-math")]}
+                        rehypePlugins={[
+                          require("rehype-katex"),
+                          require("rehype-raw"),
+                        ]}
                         components={{
                           code: ({
                             node,

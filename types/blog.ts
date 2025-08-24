@@ -2,7 +2,7 @@
 interface BlogQuery {
   published: boolean;
   featured?: boolean;
-  _id?: any; // Using any for MongoDB's _id type
+  _id?: any; 
 }
 
 interface BlogQueryOptions {

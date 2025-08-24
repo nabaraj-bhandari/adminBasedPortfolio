@@ -4,6 +4,9 @@ import dynamic from "next/dynamic";
 import { Card, CardContent } from "@/components/ui/card";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import rehypeRaw from "rehype-raw";
 
 // Lazy load heavy components
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
@@ -27,7 +30,8 @@ export function BlogContent({ content }: BlogContentProps) {
       <CardContent className="blog-markdown">
         <div className="markdown-content selectable prose prose-sm md:prose-base lg:prose-lg dark:prose-invert max-w-none">
           <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeKatex, rehypeRaw]}
             components={{
               code: ({ node, className, children, ...props }: any) => {
                 const match = /language-(\w+)/.exec(className || "");
