@@ -31,10 +31,22 @@ export function BlogContent({ content }: BlogContentProps) {
         <div className="markdown-content selectable prose prose-sm md:prose-base lg:prose-lg dark:prose-invert max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath]}
-            rehypePlugins={[rehypeKatex, rehypeRaw]}
+            rehypePlugins={[rehypeKatex]}
             components={{
               code: ({ node, className, children, ...props }: any) => {
                 const match = /language-(\w+)/.exec(className || "");
+                if (
+                  className === "language-math" ||
+                  className === "math" ||
+                  node?.type === "math"
+                ) {
+                  // Let rehype-katex handle math rendering
+                  return (
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  );
+                }
                 const isInline = !match;
                 return !isInline ? (
                   <SyntaxHighlighter
